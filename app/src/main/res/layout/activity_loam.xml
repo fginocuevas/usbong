@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EE7F5FBA"
+    tools:context=".LoamActivity">
+
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="373dp"
+        android:layout_height="176dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/loamy" />
+
+    <ScrollView
+        android:layout_width="328dp"
+        android:layout_height="531dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.47"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView8"
+        app:layout_constraintVertical_bias="0.185">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="127dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Loam Soil"
+                android:textColor="#FFEB3B"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView39"
+                android:layout_width="match_parent"
+                android:layout_height="238dp"
+                android:lineSpacingExtra="10sp"
+                android:text="Considered the most fertile of soil type, loamy soils are a combination of sandy, clay and silt particles. The clay and silt particles improve moisture retention while the sand minimizes compaction and improves drainage. Loamy soils don’t get dried out in the summer, but also don’t get water-logged in winter."
+                android:textColor="#FDF9F9"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView49"
+                android:layout_width="157dp"
+                android:layout_height="wrap_content"
+                android:text="ADVANTAGE"
+                android:textColor="#75F8E9"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                tools:layout_editor_absoluteX="-78dp"
+                tools:layout_editor_absoluteY="485dp" />
+
+            <TextView
+                android:id="@+id/textView53"
+                android:layout_width="match_parent"
+                android:layout_height="139dp"
+                android:lineSpacingExtra="10sp"
+                android:text="Drought resistant due to water-holding capacity, Faster to warm up in the spring, compared to clay , Can hold nutrients, making soils fertile and a Good infiltration of air and water"
+                android:textColor="#FDF9F9"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView54"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DISADVANTAGES"
+                android:textColor="#75F8E9"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView57"
+                android:layout_width="329dp"
+                android:layout_height="341dp"
+                android:lineSpacingExtra="10sp"
+                android:text="Depending on how your soil was formed, some loamy soils can contain stones that may affect harvesting of some crops."
+                android:textColor="#FDF9F9"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

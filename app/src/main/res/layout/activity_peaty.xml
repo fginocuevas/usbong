@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EE7F5FBA"
+    tools:context=".PeatyActivity">
+
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="387dp"
+        android:layout_height="190dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/peaty" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="324dp"
+        android:layout_height="503dp"
+        android:layout_marginTop="216dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView41"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Peaty Soil"
+                android:textColor="#FFEB3B"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView40"
+                android:layout_width="match_parent"
+                android:layout_height="321dp"
+                android:lineSpacingExtra="10sp"
+                android:text="peat is a soil material consisting of partially decomposed organic matter, found mainly in swamps and bogs in various parts of the northern temperate zone but also in some semitropical and tropical regions. Peat is formed by the slow decay of successive layers of aquatic and semiaquatic plants, e.g., sedges, reeds, rushes, and mosses, and is the earliest stage of transition from compressed plant growth to the formation of coal."
+                android:textColor="#FDF9F9"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView43"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ADVANTAGE"
+                android:textColor="#75F8E9"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView44"
+                android:layout_width="300dp"
+                android:layout_height="165dp"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="10sp"
+                android:text="In general they easily become waterlogged and are usually acidic so you will not be able to grow lime loving plants. The acidity also means that they support only a limited range of beneficial soil organisms."
+                android:textColor="#FDF9F9"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView45"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DISADVANTAGES"
+                android:textColor="#75F8E9"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView47"
+                android:layout_width="311dp"
+                android:layout_height="367dp"
+                android:lineSpacingExtra="10sp"
+                android:text="They are potentially very fertile and can be cultivated quite intensively. The addition of lime to selected areas will enable you to grow fruit and vegetables. You can make the most of your ornamental garden by growing the many beautiful acid loving plants."
+                android:textColor="#FDF9F9"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
