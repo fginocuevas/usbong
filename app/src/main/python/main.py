@@ -110,5 +110,15 @@ def treshcolor(imgData):
 
     return result
 
+def decodeImage(data):
+	decoded_data = base64.b64decode(data)
+	np_data = np.fromstring(decoded_data,np.uint8)
+	img = cv.imdecode(np_data,cv.IMREAD_UNCHANGED)
+	img_gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+	pil_im = Image.fromarray(img_gray)
 
+	buff = io.BytesIO()
+	pil_im.save(buff,format="PNG")
+	img_str = base64.b64encode(buff.getvalue())
+	return ""+str(img_str,'utf-8')
 

@@ -1,12 +1,5 @@
 package com.example.usbong;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ContentValues;
@@ -14,6 +7,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,20 +19,35 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
+import com.example.usbong.ml.SoilCnn;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import org.tensorflow.lite.DataType;
+import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class DetectActivity extends AppCompatActivity {
     private TextView mResultEt;
@@ -88,12 +98,90 @@ public class DetectActivity extends AppCompatActivity {
                 drawable = (BitmapDrawable) mPreviewIv.getDrawable();
                 bitmap = drawable.getBitmap();
                 String imgStr = getStringImage(bitmap);
-//                String imagepath = image_uri.getPath();
-                PyObject obj = pyobj.callAttr("treshcolor",imgStr);
-                String result = obj.toString();
-                mResultEt.setText(result);
+//                String imagepath = image_uri.getPath();   //Originally commented out
+
+//                PyObject obj = pyobj.callAttr("treshcolor",imgStr);
+//                String result = obj.toString();
+
+                PyObject obj = pyobj.callAttr("decodeImage",imgStr);
+                String str = obj.toString();
+
+                byte data[]=android.util.Base64.decode(str, Base64.DEFAULT);
+                Bitmap bmp = BitmapFactory.decodeByteArray(data,0, data.length);
+
+                //Classifying image using tflite model
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bmp, 224, 224, true);
+
+                try {
+                    SoilCnn model= SoilCnn.newInstance(getApplicationContext());
+
+                    // Creates inputs for reference.
+                    TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
+
+                    ByteBuffer input = ByteBuffer.allocateDirect(224 * 224 * 3 * 4).order(ByteOrder.nativeOrder());
+                    for (int y = 0; y < 224; y++) {
+                        for (int x = 0; x < 224; x++) {
+                            int px = scaledBitmap.getPixel(x, y);
+
+                            // Get channel values from the pixel value.
+                            int r = Color.red(px);
+                            int g = Color.green(px);
+                            int b = Color.blue(px);
+
+                            // Normalize channel values to [-1.0, 1.0]. This requirement depends
+                            // on the model. For example, some models might require values to be
+                            // normalized to the range [0.0, 1.0] instead.
+                            float rf = (r - 127) / 255.0f;
+                            float gf = (g - 127) / 255.0f;
+                            float bf = (b - 127) / 255.0f;
+
+                            input.putFloat(rf);
+                            input.putFloat(gf);
+                            input.putFloat(bf);
+                        }
+                    }
+
+                    TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
+                    tensorImage.load(scaledBitmap);
+                    ByteBuffer byteBuffer = input;
+                    inputFeature0.loadBuffer(byteBuffer);
+
+                    // Runs model inference and gets result.
+                    SoilCnn.Outputs outputs = model.process(inputFeature0);
+                    TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+
+                    // Releases model resources if no longer used.
+                    model.close();
+
+
+                    int result = getMax(outputFeature0.getFloatArray());
+                    mResultEt.setText(result);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
             }
         });
+    }
+
+    private int getMax(float[] arr) {
+        if (arr.length == 0) {
+            return -1;
+        }
+
+        float max = arr[0];
+        int maxIndex = 0;
+
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] > max) {
+                maxIndex = i;
+                max = arr[i];
+            }
+        }
+        System.out.println("Max value:" + max);
+        return maxIndex;
     }
 
     @Override
