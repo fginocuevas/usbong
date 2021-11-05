@@ -33,7 +33,7 @@ import androidx.core.content.ContextCompat;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
-import com.example.usbong.ml.SoilCnn;
+import com.example.usbong.ml.SoilClassifier;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -113,42 +113,50 @@ public class DetectActivity extends AppCompatActivity {
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(bmp, 224, 224, true);
 
                 try {
-                    SoilCnn model= SoilCnn.newInstance(getApplicationContext());
+                    SoilClassifier model= SoilClassifier.newInstance(getApplicationContext());
+
+//                    // Creates inputs for reference.
+//                    TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
+//
+                    ByteBuffer input = ByteBuffer.allocateDirect(224 * 224 * 3 * 4).order(ByteOrder.nativeOrder());
+//                    for (int y = 0; y < 224; y++) {
+//                        for (int x = 0; x < 224; x++) {
+//                            int px = scaledBitmap.getPixel(x, y);
+//
+//                            // Get channel values from the pixel value.
+//                            int r = Color.red(px);
+//                            int g = Color.green(px);
+//                            int b = Color.blue(px);
+//
+//                            // Normalize channel values to [-1.0, 1.0]. This requirement depends
+//                            // on the model. For example, some models might require values to be
+//                            // normalized to the range [0.0, 1.0] instead.
+//                            float rf = (r - 127) / 255.0f;
+//                            float gf = (g - 127) / 255.0f;
+//                            float bf = (b - 127) / 255.0f;
+//
+//                            input.putFloat(rf);
+//                            input.putFloat(gf);
+//                            input.putFloat(bf);
+//                        }
+//                    }
+//
+//                    TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
+//                    tensorImage.load(scaledBitmap);
+//                    ByteBuffer byteBuffer = input;
+//                    inputFeature0.loadBuffer(byteBuffer);
 
                     // Creates inputs for reference.
                     TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
-
-                    ByteBuffer input = ByteBuffer.allocateDirect(224 * 224 * 3 * 4).order(ByteOrder.nativeOrder());
-                    for (int y = 0; y < 224; y++) {
-                        for (int x = 0; x < 224; x++) {
-                            int px = scaledBitmap.getPixel(x, y);
-
-                            // Get channel values from the pixel value.
-                            int r = Color.red(px);
-                            int g = Color.green(px);
-                            int b = Color.blue(px);
-
-                            // Normalize channel values to [-1.0, 1.0]. This requirement depends
-                            // on the model. For example, some models might require values to be
-                            // normalized to the range [0.0, 1.0] instead.
-                            float rf = (r - 127) / 255.0f;
-                            float gf = (g - 127) / 255.0f;
-                            float bf = (b - 127) / 255.0f;
-
-                            input.putFloat(rf);
-                            input.putFloat(gf);
-                            input.putFloat(bf);
-                        }
-                    }
-
-                    TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
-                    tensorImage.load(scaledBitmap);
-                    ByteBuffer byteBuffer = input;
-                    inputFeature0.loadBuffer(byteBuffer);
+                    inputFeature0.loadBuffer(input);
 
                     // Runs model inference and gets result.
-                    SoilCnn.Outputs outputs = model.process(inputFeature0);
+                    SoilClassifier.Outputs outputs = model.process(inputFeature0);
                     TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+
+//                    // Runs model inference and gets result.
+//                    SoilClassifier.Outputs outputs = model.process(inputFeature0);
+//                    TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
                     // Releases model resources if no longer used.
                     model.close();
