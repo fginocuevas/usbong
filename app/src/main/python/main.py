@@ -115,7 +115,7 @@ def decodeImage(data):
 	np_data = np.fromstring(decoded_data,np.uint8)
 	img = cv.imdecode(np_data,cv.IMREAD_UNCHANGED)
 	img_gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
-	pil_im = Image.fromarray(img_gray)
+	pil_im = Image.fromarray(img)
 
 	buff = io.BytesIO()
 	pil_im.save(buff,format="PNG")

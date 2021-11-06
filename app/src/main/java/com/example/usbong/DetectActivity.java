@@ -96,12 +96,17 @@ public class DetectActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 drawable = (BitmapDrawable) mPreviewIv.getDrawable();
+
+                if(drawable == null) {
+                    System.out.println("NO OBJECT UPLOADED");
+                }
+
                 bitmap = drawable.getBitmap();
                 String imgStr = getStringImage(bitmap);
 //                String imagepath = image_uri.getPath();   //Originally commented out
 
-//                PyObject obj = pyobj.callAttr("treshcolor",imgStr);
-//                String result = obj.toString();
+                PyObject treshcolor_py = pyobj.callAttr("treshcolor",imgStr);
+                String result = treshcolor_py.toString();
 
                 PyObject obj = pyobj.callAttr("decodeImage",imgStr);
                 String str = obj.toString();
@@ -132,9 +137,32 @@ public class DetectActivity extends AppCompatActivity {
 
                     String resultStr= "";
 
-                    for(Float flt: outputFeature0.getFloatArray()){
-                        resultStr += flt + " , ";
+//                    for(Float flt: outputFeature0.getFloatArray()){
+//                        resultStr += flt + " , ";
+//                    }
+
+                    for(int i= 0; i < outputFeature0.getFloatArray().length; i++ ) {
+
+                        switch (i) {
+                            case 0:
+                                resultStr += "Clay: " + outputFeature0.getFloatArray()[0] * 100 + "% \n";
+                                break;
+                            case 1:
+                                resultStr += "Loam: " + outputFeature0.getFloatArray()[1] * 100 + "% \n";
+                                break;
+                            case 2:
+                                resultStr += "Sandy: " + outputFeature0.getFloatArray()[2] * 100 + "% \n";
+                                break;
+                            case 3:
+                                resultStr += "Silt: " + outputFeature0.getFloatArray()[3] * 100 + "% \n";
+                                break;
+                            default:
+                                resultStr += "Unknown type";
+                        }
+
                     }
+
+                    resultStr += "\n\n" + result;
 
                     mResultEt.setText(resultStr);
 
