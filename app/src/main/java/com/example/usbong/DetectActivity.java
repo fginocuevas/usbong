@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -33,6 +34,7 @@ import androidx.core.content.ContextCompat;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
+import com.example.usbong.ml.Model;
 import com.example.usbong.ml.SoilClassifier;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
@@ -65,6 +67,8 @@ public class DetectActivity extends AppCompatActivity {
     private String cameraPermission[];
     private String storagePermission[];
     private Uri image_uri;
+    
+    private int imageSize= 224;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,32 +106,38 @@ public class DetectActivity extends AppCompatActivity {
                 }
 
                 bitmap = drawable.getBitmap();
-                String imgStr = getStringImage(bitmap);
-//                String imagepath = image_uri.getPath();   //Originally commented out
-
-                PyObject treshcolor_py = pyobj.callAttr("treshcolor",imgStr);
-                String result = treshcolor_py.toString();
-
-                PyObject obj = pyobj.callAttr("decodeImage",imgStr);
-                String str = obj.toString();
-
-                byte data[]=android.util.Base64.decode(str, Base64.DEFAULT);
-                Bitmap bmp = BitmapFactory.decodeByteArray(data,0, data.length);
-
-                //Classifying image using tflite model
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bmp, 224, 224, true);
+                bitmap = Bitmap.createScaledBitmap(bitmap, imageSize, imageSize, false);
 
                 try {
-                    SoilClassifier model= SoilClassifier.newInstance(getApplicationContext());
+//                    SoilClassifier model= SoilClassifier.newInstance(getApplicationContext());
+                    Model model= Model.newInstance(getApplicationContext());
 
-                    ByteBuffer input = ByteBuffer.allocateDirect(224 * 224 * 3 * 4).order(ByteOrder.nativeOrder());
+                    ByteBuffer input = ByteBuffer.allocateDirect(imageSize * imageSize * 3 * 4).order(ByteOrder.nativeOrder());
 
                     // Creates inputs for reference.
-                    TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
+                    TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, imageSize, imageSize, 3}, DataType.FLOAT32);
                     inputFeature0.loadBuffer(input);
 
+                    // get 1D array of imageSize * imageSize pixels in image
+                    int [] intValues = new int[imageSize * imageSize];
+                    bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+                    // iterate over pixels and extract R, G, and B values. Add to bytebuffer.
+                    int pixel = 0;
+                    for(int i = 0; i < imageSize; i++){
+                        for(int j = 0; j < imageSize; j++){
+                            int val = intValues[pixel++]; // RGB
+                            input.putFloat(((val >> 16) & 0xFF) * (1.f / 255.f));
+                            input.putFloat(((val >> 8) & 0xFF) * (1.f / 255.f));
+                            input.putFloat((val & 0xFF) * (1.f / 255.f));
+                        }
+                    }
+
+                    inputFeature0.loadBuffer(input);
+                    
                     // Runs model inference and gets result.
-                    SoilClassifier.Outputs outputs = model.process(inputFeature0);
+//                    SoilClassifier.Outputs outputs = model.process(inputFeature0);
+                    Model.Outputs outputs = model.process(inputFeature0);
                     TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
                     // Releases model resources if no longer used.
@@ -137,32 +147,25 @@ public class DetectActivity extends AppCompatActivity {
 
                     String resultStr= "";
 
-//                    for(Float flt: outputFeature0.getFloatArray()){
-//                        resultStr += flt + " , ";
-//                    }
-
-                    for(int i= 0; i < outputFeature0.getFloatArray().length; i++ ) {
-
-                        switch (i) {
-                            case 0:
-                                resultStr += "Clay: " + outputFeature0.getFloatArray()[0] * 100 + "% \n";
-                                break;
-                            case 1:
-                                resultStr += "Loam: " + outputFeature0.getFloatArray()[1] * 100 + "% \n";
-                                break;
-                            case 2:
-                                resultStr += "Sandy: " + outputFeature0.getFloatArray()[2] * 100 + "% \n";
-                                break;
-                            case 3:
-                                resultStr += "Silt: " + outputFeature0.getFloatArray()[3] * 100 + "% \n";
-                                break;
-                            default:
-                                resultStr += "Unknown type";
+                    float[] confidences = outputFeature0.getFloatArray();
+                    // find the index of the class with the biggest confidence.
+                    int maxPos = 0;
+                    float maxConfidence = 0;
+                    for(int i = 0; i < confidences.length; i++){
+                        if(confidences[i] > maxConfidence){
+                            maxConfidence = confidences[i];
+                            maxPos = i;
                         }
+                    }
+                    String[] classes = {"Clay", "Loam", "Peaty", "Sandy"};
+                    resultStr = "\n\nHighest Match: " + classes[maxPos];
 
+                    String s = "";
+                    for(int i = 0; i < classes.length; i++){
+                        s += String.format("%s: %.1f%%\n", classes[i], confidences[i] * 100);
                     }
 
-                    resultStr += "\n\n" + result;
+                    resultStr += "\n\n" + s;
 
                     mResultEt.setText(resultStr);
 
