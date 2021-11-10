@@ -108,6 +108,12 @@ public class DetectActivity extends AppCompatActivity {
                 bitmap = drawable.getBitmap();
                 bitmap = Bitmap.createScaledBitmap(bitmap, imageSize, imageSize, false);
 
+                String imgStr = getStringImage(bitmap);
+
+                PyObject treshcolor_py = pyobj.callAttr("treshcolor",imgStr);
+                String treshResults = treshcolor_py.toString();
+
+
                 try {
 //                    SoilClassifier model= SoilClassifier.newInstance(getApplicationContext());
                     Model model= Model.newInstance(getApplicationContext());
@@ -158,7 +164,7 @@ public class DetectActivity extends AppCompatActivity {
                         }
                     }
                     String[] classes = {"Clay", "Loam", "Peaty", "Sandy"};
-                    resultStr = "\n\nHighest Match: " + classes[maxPos];
+                    resultStr = "Highest Match: " + classes[maxPos];
 
                     String s = "";
                     for(int i = 0; i < classes.length; i++){
@@ -167,7 +173,7 @@ public class DetectActivity extends AppCompatActivity {
 
                     resultStr += "\n\n" + s;
 
-                    mResultEt.setText(resultStr);
+                    mResultEt.setText(resultStr + "\n\n" + treshResults);
 
                 } catch (IOException e) {
                     e.printStackTrace();
